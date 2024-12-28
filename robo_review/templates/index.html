@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Парсер отзывов</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .form-group button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .form-group button:hover {
+            background-color: #0056b3;
+        }
+        .results {
+            margin-top: 20px;
+        }
+        .review {
+            padding: 10px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Парсер отзывов с Litres</h1>
+        <form id="reviews-form" class="form-group">
+            <label for="book-url">Введите URL книги:</label>
+            <input type="text" id="book-url" name="book_url" placeholder="https://www.litres.ru/example-book/" required>
+            <button type="submit">Получить отзывы</button>
+        </form>
+        <div id="results" class="results"></div>
+    </div>
+    <script>
+        document.getElementById('reviews-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const url = document.getElementById('book-url').value;
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>Загрузка отзывов...</p>';
+
+            try {
+                const response = await fetch('', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: new URLSearchParams({
+                        'book_url': url
+                    })
+                });
+                const data = await response.json();
+                resultsDiv.innerHTML = '';
+                if (data.error) {
+                    resultsDiv.innerHTML = `<p style="color:red;">Ошибка: ${data.error}</p>`;
+                } else {
+                    data.reviews.forEach(review => {
+                        resultsDiv.innerHTML += `
+                            <div class="review">
+                                <strong>${review.author || 'Аноним'}</strong> (${review.rating}/5)
+                                <p>${review.text}</p>
+                            </div>
+                        `;
+                    });
+                }
+            } catch (err) {
+                resultsDiv.innerHTML = `<p style="color:red;">Ошибка: ${err.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
