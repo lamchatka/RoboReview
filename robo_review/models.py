@@ -24,7 +24,7 @@ class Book(models.Model):
     isbn = models.CharField(max_length=13, unique=True)
     genre = models.CharField(max_length=100)
     published_year = models.IntegerField()
-    # добавить descriptionё
+    # добавить description
 
 
 # Отзыв
