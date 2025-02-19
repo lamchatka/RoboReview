@@ -1,4 +1,5 @@
 # Create your views here.
+from django.http import JsonResponse
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.response import Response
@@ -8,6 +9,7 @@ from .models import Book, Review
 from .serializers import BookSerializer, ReviewSerializer
 
 
+# ========== API ==========
 class BookListView(APIView):
     def get(self, request):
         books = Book.objects.all()
@@ -23,6 +25,7 @@ class BookListView(APIView):
 
 
 class ReviewListView(APIView):
+    # TODO: изменил модель, может упасть апишка
     def get(self, request):
         reviews = Review.objects.all()
         serializer = ReviewSerializer(reviews, many=True)
