@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.db.models import UniqueConstraint
 
 
 class User(AbstractUser):
@@ -41,6 +42,15 @@ class Review(models.Model):
     review_date = models.DateTimeField(null=True, blank=True)
     # TODO: подумать над моделью отзывов: нужно ли хранить ник автора отзыва
     # TODO: Как оценивать sentiment? По каким метрикам? По rating (кол-во звезд)?
+
+    # Исключаем дублирующиеся отзывы на уровне БД (админка, SQL)
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=['book', 'author_nickname', 'text', 'source'],
+                name='unique_review_constraint'
+            )
+        ]
 
 
 # Рекомендация
