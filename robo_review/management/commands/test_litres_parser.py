@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 from parsers.litres_parser.litres_parser import LitresParser
 from robo_review.models import Book, Review
 from datetime import datetime
-import locale
+from django.utils import timezone
 
 
 class Command(BaseCommand):
@@ -35,19 +35,15 @@ class Command(BaseCommand):
         else:
             print(f"Книга с таким названием существует: {book}")
 
-        # TODO: правильно преобразовать строку в объект datetime
-        # locale.setlocale(locale.LC_TIME, "ru_RU.UTF-8")  # Устанавливаем русскую локаль
-        # raw_date = "15 января 2024, 18:54"
-        # parsed_date = datetime.strptime(raw_date, "%d %B %Y, %H:%M")
-        # print(parsed_date)
-        # review["review_date"], review["review_time"] = datetime.strptime()
-
         # Создаем множество кортежей (уникальность по 4 полям: book, author_nickname, text, source
         existing_reviews = set(
             Review.objects.filter(book=book).values_list("author_nickname", "text", "source")
         )
         new_reviews = []
         for review in reviews:
+            parsed_datetime = datetime.strptime(f"{review['review_date']} {review['review_time']}", "%d.%m.%Y %H:%M")
+            aware_date_time = timezone.make_aware(parsed_datetime)
+            print(aware_date_time)
             review_tuple = (review["author_nickname"], review["text"], review["source"])
             if review_tuple not in existing_reviews:
                 new_reviews.append(
@@ -56,6 +52,7 @@ class Command(BaseCommand):
                         author_nickname=review["author_nickname"],
                         text=review["text"],
                         source=review["source"],
+                        review_date=aware_date_time
                     )
                 )
             existing_reviews.add(review_tuple)
