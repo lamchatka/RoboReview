@@ -40,6 +40,7 @@ class Review(models.Model):
                                  blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)  # отслеживает, дату и время, когда отзыв попал в БД
     review_date = models.DateTimeField(null=True, blank=True)
+
     # TODO: подумать над моделью отзывов: нужно ли хранить ник автора отзыва
     # TODO: Как оценивать sentiment? По каким метрикам? По rating (кол-во звезд)?
 
@@ -51,6 +52,22 @@ class Review(models.Model):
                 name='unique_review_constraint'
             )
         ]
+
+
+class BookSource(models.Model):
+    LITRES = "LI"
+    OZON = "OZ"
+    SOURCES_CHOICES = [
+        (LITRES, "Litres"),
+        (OZON, "Ozon")
+    ]
+
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name="sources")
+    source_name = models.CharField(max_length=50, choices=SOURCES_CHOICES, default=LITRES)
+    url = models.URLField(unique=True)
+
+    def __str__(self):
+        return f"({self.get_source_name_display()}) {self.book.title} "
 
 
 # Рекомендация
