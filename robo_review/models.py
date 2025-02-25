@@ -30,12 +30,26 @@ class Book(models.Model):
         return self.title
 
 
+class Source(models.Model):
+    LITRES = "LI"
+    OZON = "OZ"
+    SOURCES_CHOICES = [
+        (LITRES, "Litres"),
+        (OZON, "Ozon")
+    ]
+
+    name = models.CharField(max_length=50, choices=SOURCES_CHOICES, unique=True)
+
+    def __str__(self):
+        return self.get_name_display()
+
+
 # Отзыв
 class Review(models.Model):
     book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name='reviews')
     author_nickname = models.CharField(max_length=70, blank=True, null=True)
     text = models.TextField()
-    source = models.CharField(max_length=100)
+    source = models.ForeignKey(Source, on_delete=models.CASCADE)
     sentiment = models.CharField(max_length=20, choices=[('positive', 'Positive'), ('negative', 'Negative')],
                                  blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)  # отслеживает, дату и время, когда отзыв попал в БД
@@ -52,20 +66,6 @@ class Review(models.Model):
                 name='unique_review_constraint'
             )
         ]
-
-
-class Source(models.Model):
-    LITRES = "LI"
-    OZON = "OZ"
-    SOURCES_CHOICES = [
-        (LITRES, "Litres"),
-        (OZON, "Ozon")
-    ]
-
-    name = models.CharField(max_length=50, choices=SOURCES_CHOICES, unique=True)
-
-    def __str__(self):
-        return self.get_name_display()
 
 
 class BookSource(models.Model):
