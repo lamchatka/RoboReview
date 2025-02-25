@@ -54,7 +54,7 @@ class Review(models.Model):
         ]
 
 
-class BookSource(models.Model):
+class Source(models.Model):
     LITRES = "LI"
     OZON = "OZ"
     SOURCES_CHOICES = [
@@ -62,12 +62,22 @@ class BookSource(models.Model):
         (OZON, "Ozon")
     ]
 
-    book = models.ForeignKey(Book, on_delete=models.CASCADE, related_name="sources")
-    source_name = models.CharField(max_length=50, choices=SOURCES_CHOICES, default=LITRES)
-    url = models.URLField(unique=True)
+    name = models.CharField(max_length=50, choices=SOURCES_CHOICES, unique=True)
 
     def __str__(self):
-        return f"({self.get_source_name_display()}) {self.book.title} "
+        return self.get_name_display()
+
+
+class BookSource(models.Model):
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    source = models.ForeignKey(Source, on_delete=models.CASCADE)
+    url = models.URLField(unique=True)
+
+    class Meta:
+        unique_together = ("book", "source")
+
+    def __str__(self):
+        return f"({self.get_name_display()}) {self.book.title} "
 
 
 # Рекомендация
